@@ -1,0 +1,43 @@
+# Doc from
+https://github.com/javaducky/opentelemetry-demo/tree/main
+# my docker deploy info
+https://opentelemetry.io/docs/demo/docker-deployment/
+
+# clone the the project
+git clone https://github.com/elkninja/elastic-stack-docker-part-two.git
+
+# validate the docker compose config
+disable the insecure option for "fleet aget"
+FLEET_INSECURE=true # remove
+FLEET_SERVER_ELASTICSEARCH_INSECURE=true # remove
+
+
+# start docker compose
+docker compose up -d
+
+
+# fleet configuration
+- go to the kibana console and login
+- go to fleet > settings
+  - update the Output configs with the DNS or corresponding ip address
+  - get the ca from the "setup container" 
+     $ docker cp es-cluster-es01-1:/usr/share/elasticsearch/config/certs/ca/ca.crt .
+  - get the fingetprint
+    $ openssl x509 -fingerprint -sha256 -noout -in ca.crt  | awk -F"=" {' print $2 '} | sed s/://g
+  - get the ca.crt yaml
+ca.yaml
+---
+ssl:
+  certificate_authorities:
+  - |
+    -----BEGIN CERTIFICATE-----
+    omited output
+    -----END CERTIFICATE----
+...
+
+
+# k8s
+# pre req install Kube-State-Metrics
+# https://medium.com/@seifeddinerajhi/monitoring-kubernetes-clusters-with-kube-state-metrics-2b9e73a67895
+git clone https://github.com/kubernetes/kube-state-metrics
+kubectl apply -f kube-state-metrics/examples/standard/
